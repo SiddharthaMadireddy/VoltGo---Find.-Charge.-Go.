@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink-50 text-ink-900 font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    @apply bg-volt-500/25 text-ink-900;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .container-narrow {
+    @apply mx-auto w-full max-w-3xl px-4 sm:px-6;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply btn bg-volt-500 text-white shadow-glow hover:bg-volt-600;
+  }
+  .btn-dark {
+    @apply btn bg-ink-900 text-white hover:bg-ink-800;
+  }
+  .btn-ghost {
+    @apply btn bg-white text-ink-800 ring-1 ring-ink-200 hover:bg-ink-50;
+  }
+  .btn-soft {
+    @apply btn bg-volt-50 text-volt-700 hover:bg-volt-100;
+  }
+  .btn-sm {
+    @apply px-3.5 py-2 text-[13px] rounded-lg;
+  }
+
+  .card {
+    @apply rounded-2xl bg-white ring-1 ring-ink-200/70 shadow-card;
+  }
+  .card-pad {
+    @apply card p-5;
+  }
+
+  .input {
+    @apply w-full rounded-xl bg-white px-4 py-3 text-sm text-ink-900 ring-1 ring-ink-200 placeholder:text-ink-400 transition focus:outline-none focus:ring-2 focus:ring-volt-500/60;
+  }
+  .label {
+    @apply mb-1.5 block text-[13px] font-semibold text-ink-700;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition;
+  }
+  .chip-base {
+    @apply chip bg-ink-100 text-ink-700;
+  }
+  .chip-volt {
+    @apply chip bg-volt-50 text-volt-700;
+  }
+  .chip-spark {
+    @apply chip bg-spark-50 text-spark-700;
+  }
+  .chip-amber {
+    @apply chip bg-amber-50 text-amberx-600;
+  }
+  .chip-rose {
+    @apply chip bg-rose-50 text-rosex-600;
+  }
+  .chip-gray {
+    @apply chip bg-ink-100 text-ink-500;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink-600 transition hover:bg-ink-100 hover:text-ink-900;
+  }
+  .nav-link-active {
+    @apply bg-volt-50 text-volt-700 hover:bg-volt-50 hover:text-volt-700;
+  }
+
+  .stat-pill {
+    @apply rounded-2xl bg-white px-4 py-3 ring-1 ring-ink-200/70 shadow-card;
+  }
+
+  .divider {
+    @apply h-px w-full bg-ink-200/70;
+  }
+
+  .grid-map {
+    background-image:
+      linear-gradient(to right, rgba(15,19,32,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15,19,32,0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(15,19,32,0.18); border-radius: 999px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .text-balance { text-wrap: balance; }
+  .mask-fade-r { -webkit-mask-image: linear-gradient(to right, black 80%, transparent); mask-image: linear-gradient(to right, black 80%, transparent); }
+}
