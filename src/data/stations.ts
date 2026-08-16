@@ -1,6 +1,7 @@
 export type ChargerStatus = 'available' | 'occupied' | 'offline';
 export type ConnectorType = 'CCS2' | 'Type 2' | 'CHAdeMO' | 'GB/T';
 export type CurrentType = 'AC' | 'DC';
+import { MORE_STATIONS } from './extraStations';
 
 export interface Charger {
   id: string;
@@ -91,7 +92,7 @@ export const CONNECTORS: Record<ConnectorType, {
   },
 };
 
-function chargers(
+export function chargers(
   specs: Array<[ConnectorType, CurrentType, number, ChargerStatus, [number, number]]>,
   pricePerKwh = 18,
 ): Charger[] {
@@ -615,3 +616,5 @@ export interface Booking {
   total: number;
   status: 'upcoming' | 'completed' | 'cancelled';
 }
+
+STATIONS.push(...MORE_STATIONS);
