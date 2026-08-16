@@ -16,6 +16,8 @@ import { AboutPage } from '@/pages/AboutPage';
 import { ContactPage } from '@/pages/ContactPage';
 import { FAQPage } from '@/pages/FAQPage';
 import { MockOAuthPage } from '@/pages/MockOAuthPage';
+import { TermsPage } from '@/pages/TermsPage';
+import { PrivacyPage } from '@/pages/PrivacyPage';
 
 function Router() {
   const { user, route } = useApp();
@@ -40,6 +42,10 @@ function Router() {
       return <ConnectorsPage />;
     case 'mock-oauth':
       return <MockOAuthPage />;
+    case 'terms':
+      return <TermsPage />;
+    case 'privacy':
+      return <PrivacyPage />;
     default:
       break;
   }

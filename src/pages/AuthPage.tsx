@@ -197,7 +197,7 @@ function LoginForm({ show, setShow }: { show: boolean; setShow: (v: boolean) => 
 }
 
 function RegisterForm({ show, setShow }: { show: boolean; setShow: (v: boolean) => void }) {
-  const { registerUser, toast } = useApp();
+  const { registerUser, toast, navigate } = useApp();
   return (
     <form
       className="mt-7 space-y-4"
@@ -272,7 +272,7 @@ function RegisterForm({ show, setShow }: { show: boolean; setShow: (v: boolean) 
       </div>
       <label className="flex items-start gap-2 text-sm text-ink-600">
         <input type="checkbox" defaultChecked className="mt-0.5 h-4 w-4 rounded border-ink-300 text-volt-500 focus:ring-volt-500" />
-        I agree to the <button type="button" className="font-semibold text-volt-600 hover:underline">Terms & Conditions</button> and <button type="button" className="font-semibold text-volt-600 hover:underline">Privacy Policy</button>
+        I agree to the <button type="button" onClick={() => navigate('terms')} className="font-semibold text-volt-600 hover:underline">Terms & Conditions</button> and <button type="button" onClick={() => navigate('privacy')} className="font-semibold text-volt-600 hover:underline">Privacy Policy</button>
       </label>
       <button type="submit" className="btn-primary w-full text-base">
         Create Account <ArrowRight className="h-4 w-4" />

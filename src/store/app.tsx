@@ -6,7 +6,7 @@ import {
 } from '@/data/stations';
 
 export type PublicRoute =
-  | 'home' | 'about' | 'contact' | 'faq' | 'pricing' | 'connectors' | 'login' | 'register';
+  | 'home' | 'about' | 'contact' | 'faq' | 'pricing' | 'connectors' | 'login' | 'register' | 'terms' | 'privacy';
 
 export type AppRoute =
   | 'dashboard' | 'find' | 'bookings' | 'history' | 'wallet'
