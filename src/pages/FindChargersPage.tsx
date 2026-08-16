@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '@/store/app';
 import { DashboardShell } from '@/components/DashboardShell';
+import { PublicShell } from '@/components/PublicShell';
 import {
   STATIONS, CITIES, ChargingStation, stationAvailableCount, stationMaxPower, stationMinPrice, stationConnectors,
 } from '@/data/stations';
@@ -27,9 +28,9 @@ const FILTERS: { key: FilterKey; label: string }[] = [
 ];
 
 export function FindChargersPage() {
-  const { favorites } = useApp();
+  const { favorites, user } = useApp();
   const [query, setQuery] = useState('');
-  const [city, setCity] = useState('All Cities');
+  const [city, setCity] = useState('Hyderabad');
   const [filter, setFilter] = useState<FilterKey>('all');
   const [connectorFilter, setConnectorFilter] = useState<string | null>(null);
   const [selected, setSelected] = useState<ChargingStation | null>(null);
@@ -59,9 +60,12 @@ export function FindChargersPage() {
     setSelected(s);
   }
 
+  const Wrapper = (props: any) => user ? <DashboardShell {...props} /> : <PublicShell {...props} />;
+
   return (
-    <DashboardShell title="Find Chargers">
-      {/* Mobile: map first, then list. Desktop: list left, map right. */}
+    <Wrapper title="Find Chargers">
+      <div className={user ? '' : 'container-x py-8'}>
+        {/* Mobile: map first, then list. Desktop: list left, map right. */}
       <div className="grid gap-5 lg:grid-cols-[400px_1fr]">
         {/* LEFT: search + filters + list */}
         <div className="flex flex-col gap-4 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-1 scrollbar-thin">
@@ -171,7 +175,8 @@ export function FindChargersPage() {
       </div>
 
       {selected && <StationDetailsModal station={selected} onClose={() => setSelected(null)} />}
-    </DashboardShell>
+      </div>
+    </Wrapper>
   );
 }
 

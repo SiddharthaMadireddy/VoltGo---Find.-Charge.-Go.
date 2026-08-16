@@ -1,4 +1,5 @@
 import { useApp } from '@/store/app';
+import { PublicShell } from '@/components/PublicShell';
 import { SectionHeading } from '@/components/ui';
 import {
   Search, Zap, MapPin, Star, Clock, Wallet, ShieldCheck, Calendar,
@@ -11,9 +12,8 @@ const HERO_IMG = 'https://images.pexels.com/photos/4678065/pexels-photo-4678065.
 const HERO_IMG_2 = 'https://images.pexels.com/photos/28851165/pexels-photo-28851165.jpeg?auto=compress&cs=tinysrgb&h=900&w=1400';
 
 export function LandingPage() {
-  const { navigate } = useApp();
   return (
-    <div>
+    <PublicShell>
       <Hero />
       <StatsBar />
       <HowItWorks />
@@ -21,7 +21,7 @@ export function LandingPage() {
       <FeaturePreview />
       <ConnectorStrip />
       <CTA />
-    </div>
+    </PublicShell>
   );
 }
 
@@ -33,7 +33,7 @@ function Hero() {
       <div className="absolute -right-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-volt-500/10 blur-3xl" />
       <div className="absolute -left-40 top-40 h-[28rem] w-[28rem] rounded-full bg-spark-500/10 blur-3xl" />
 
-      <div className="container-x relative grid items-center gap-10 py-16 lg:grid-cols-[1.05fr_1fr] lg:py-24">
+      <div className="container-x relative grid items-center gap-10 pt-8 pb-16 lg:grid-cols-[1.05fr_1fr] lg:pt-12 lg:pb-24">
         <div className="animate-fade-up">
           <span className="chip-volt mb-5 text-xs">
             <span className="relative flex h-2 w-2">

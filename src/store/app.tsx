@@ -6,10 +6,10 @@ import {
 } from '@/data/stations';
 
 export type PublicRoute =
-  | 'home' | 'about' | 'contact' | 'faq' | 'pricing' | 'connectors' | 'login' | 'register' | 'terms' | 'privacy';
+  | 'home' | 'about' | 'contact' | 'faq' | 'pricing' | 'connectors' | 'login' | 'register' | 'terms' | 'privacy' | 'find';
 
 export type AppRoute =
-  | 'dashboard' | 'find' | 'bookings' | 'history' | 'wallet'
+  | 'dashboard' | 'bookings' | 'history' | 'wallet'
   | 'vehicles' | 'profile' | 'notifications';
 
 export type Route = PublicRoute | AppRoute;

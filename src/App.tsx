@@ -46,6 +46,8 @@ function Router() {
       return <TermsPage />;
     case 'privacy':
       return <PrivacyPage />;
+    case 'find':
+      return <FindChargersPage />;
     default:
       break;
   }
@@ -58,8 +60,6 @@ function Router() {
   switch (route) {
     case 'dashboard':
       return <DashboardPage />;
-    case 'find':
-      return <FindChargersPage />;
     case 'bookings':
       return <BookingsPage />;
     case 'history':
