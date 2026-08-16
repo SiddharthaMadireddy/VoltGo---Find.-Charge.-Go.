@@ -84,4 +84,16 @@ db.exec(`
   );
 `);
 
+// Add password column if it doesn't exist (migration)
+const tableInfo = db.prepare("PRAGMA table_info(users)").all();
+if (!tableInfo.some(col => col.name === 'password')) {
+  db.prepare("ALTER TABLE users ADD COLUMN password TEXT").run();
+}
+if (!tableInfo.some(col => col.name === 'resetOtp')) {
+  db.prepare("ALTER TABLE users ADD COLUMN resetOtp TEXT").run();
+}
+if (!tableInfo.some(col => col.name === 'resetOtpExpires')) {
+  db.prepare("ALTER TABLE users ADD COLUMN resetOtpExpires INTEGER").run();
+}
+
 export default db;

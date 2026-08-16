@@ -21,13 +21,14 @@ export interface User {
   phone: string;
   avatarColor: string;
   walletBalance?: number;
+  password?: string;
 }
 
 interface Toast { id: number; title: string; body?: string; tone: 'success' | 'info' | 'error'; }
 
 interface AppState {
   user: User | null;
-  loginUser: (email: string) => Promise<void>;
+  loginUser: (email: string, password?: string) => Promise<void>;
   loginWithGoogleToken: (token: string) => Promise<void>;
   registerUser: (u: User) => Promise<void>;
   logout: () => void;
@@ -95,14 +96,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setNotifications(data.notifications || []);
   };
 
-  const loginUser = useCallback(async (email: string) => {
+  const loginUser = useCallback(async (email: string, password?: string) => {
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, password })
       });
-      if (!res.ok) throw new Error('Login failed. Ensure account exists.');
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Login failed.');
+      }
       const data = await res.json();
       loadUserData(data);
       setRoute('dashboard');

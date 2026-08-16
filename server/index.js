@@ -1,7 +1,20 @@
 import express from 'express';
 import cors from 'cors';
 import { OAuth2Client } from 'google-auth-library';
+import bcrypt from 'bcrypt';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 import db from './db.js';
+
+dotenv.config();
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 const app = express();
 app.use(cors());
@@ -63,16 +76,18 @@ function seedDummyData(userId) {
   notifs.forEach(n => insertNotif.run(n));
 }
 
-app.post('/api/auth/register', (req, res) => {
-  const { name, email, phone, avatarColor } = req.body;
+app.post('/api/auth/register', async (req, res) => {
+  const { name, email, phone, avatarColor, password } = req.body;
   try {
     const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
     if (existingUser) {
       return res.status(400).json({ error: 'Email already exists' });
     }
 
-    const result = db.prepare('INSERT INTO users (name, email, phone, avatarColor, walletBalance) VALUES (?, ?, ?, ?, ?)')
-      .run(name, email, phone, avatarColor, 0);
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+
+    const result = db.prepare('INSERT INTO users (name, email, phone, avatarColor, walletBalance, password) VALUES (?, ?, ?, ?, ?, ?)')
+      .run(name, email, phone, avatarColor, 0, hashedPassword);
     
     const newUserId = result.lastInsertRowid;
     
@@ -87,13 +102,95 @@ app.post('/api/auth/register', (req, res) => {
   }
 });
 
-app.post('/api/auth/login', (req, res) => {
-  const { email } = req.body;
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body;
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
+  if (user.password) {
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ error: 'Wrong password' });
+  } else if (password) {
+    return res.status(401).json({ error: 'Wrong password' });
+  }
   res.json(getUserState(user.id));
+});
+
+app.post('/api/auth/change-password', async (req, res) => {
+  const { email, oldPassword, newPassword } = req.body;
+  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  if (user.password) {
+    const match = await bcrypt.compare(oldPassword, user.password);
+    if (!match) return res.status(401).json({ error: 'Wrong password' });
+  } else if (oldPassword) {
+    return res.status(401).json({ error: 'Wrong password' });
+  }
+
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedNewPassword, user.id);
+  res.json({ success: true });
+});
+
+app.post('/api/auth/request-otp', async (req, res) => {
+  const { emailOrPhone } = req.body;
+  const user = db.prepare('SELECT * FROM users WHERE email = ? OR phone = ?').get(emailOrPhone, emailOrPhone);
+  
+  if (!user) {
+    return res.status(404).json({ error: 'Account not found with this email or phone' });
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = Date.now() + 10 * 60 * 1000;
+
+  db.prepare('UPDATE users SET resetOtp = ?, resetOtpExpires = ? WHERE id = ?').run(otp, expiresAt, user.id);
+
+  const hasCreds = process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.EMAIL_USER !== 'your-email@gmail.com';
+
+  if (user.email && hasCreds) {
+    try {
+      await transporter.sendMail({
+        from: `"VoltGo Support" <${process.env.EMAIL_USER}>`,
+        to: user.email,
+        subject: 'VoltGo Password Reset OTP',
+        text: `Your OTP for password reset is: ${otp}\nThis code will expire in 10 minutes.`,
+        html: `<p>Your OTP for password reset is: <b>${otp}</b></p><p>This code will expire in 10 minutes.</p>`
+      });
+      console.log(`[EMAIL SENT] OTP successfully emailed to ${user.email}`);
+    } catch (err) {
+      console.error('[EMAIL ERROR]', err);
+      return res.status(500).json({ error: 'Failed to send email. Check server configuration.' });
+    }
+  } else {
+    // Fallback to mock log if no real credentials are provided
+    console.log(`\n========================================`);
+    console.log(`[MOCK EMAIL/SMS] OTP for ${user.email} is: ${otp}`);
+    console.log(`========================================\n`);
+  }
+
+  res.json({ success: true, message: 'OTP sent successfully.' });
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { emailOrPhone, otp, newPassword } = req.body;
+  const user = db.prepare('SELECT * FROM users WHERE email = ? OR phone = ?').get(emailOrPhone, emailOrPhone);
+
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  
+  if (!user.resetOtp || user.resetOtp !== otp) {
+    return res.status(400).json({ error: 'Invalid OTP' });
+  }
+
+  if (Date.now() > user.resetOtpExpires) {
+    return res.status(400).json({ error: 'OTP has expired' });
+  }
+
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+  db.prepare('UPDATE users SET password = ?, resetOtp = NULL, resetOtpExpires = NULL WHERE id = ?').run(hashedNewPassword, user.id);
+  
+  res.json({ success: true, message: 'Password reset successfully' });
 });
 
 const googleClient = new OAuth2Client('343639237864-13b40p009vie5mt6me1ouag4jutp73rk.apps.googleusercontent.com');

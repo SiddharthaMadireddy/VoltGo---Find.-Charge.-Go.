@@ -150,49 +150,54 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
 
 function LoginForm({ show, setShow }: { show: boolean; setShow: (v: boolean) => void }) {
   const { loginUser, navigate } = useApp();
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   return (
-    <form
-      className="mt-7 space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const data = new FormData(e.currentTarget);
-        const emailOrPhone = data.get('emailOrPhone') as string || 'Guest';
-        loginUser(emailOrPhone);
-      }}
-    >
-      <div>
-        <label className="label">Email or Phone Number</label>
-        <div className="relative">
-          <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-400" />
-          <input name="emailOrPhone" className="input pl-11" type="text" placeholder="you@example.com" required />
+    <>
+      <form
+        className="mt-7 space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          const emailOrPhone = data.get('emailOrPhone') as string || 'Guest';
+          const password = data.get('password') as string || '';
+          loginUser(emailOrPhone, password);
+        }}
+      >
+        <div>
+          <label className="label">Email or Phone Number</label>
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-400" />
+            <input name="emailOrPhone" className="input pl-11" type="text" placeholder="you@example.com" required />
+          </div>
         </div>
-      </div>
-      <div>
-        <label className="label">Password</label>
-        <div className="relative">
-          <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-400" />
-          <input name="password" className="input pl-11 pr-11" type={show ? 'text' : 'password'} placeholder="••••••••" required />
-          <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700">
-            {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-          </button>
+        <div>
+          <label className="label">Password</label>
+          <div className="relative">
+            <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-400" />
+            <input name="password" className="input pl-11 pr-11" type={show ? 'text' : 'password'} placeholder="••••••••" required />
+            <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700">
+              {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="flex items-center justify-between text-sm">
-        <label className="flex items-center gap-2 text-ink-600">
-          <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-ink-300 text-volt-500 focus:ring-volt-500" />
-          Remember me
-        </label>
-        <button type="button" className="font-semibold text-volt-600 hover:underline">Forgot password?</button>
-      </div>
-      <button type="submit" className="btn-primary w-full text-base">
-        Login <ArrowRight className="h-4 w-4" />
-      </button>
-    </form>
+        <div className="flex items-center justify-between text-sm">
+          <label className="flex items-center gap-2 text-ink-600">
+            <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-ink-300 text-volt-500 focus:ring-volt-500" />
+            Remember me
+          </label>
+          <button type="button" onClick={() => setShowChangePasswordModal(true)} className="font-semibold text-volt-600 hover:underline">Change Password</button>
+        </div>
+        <button type="submit" className="btn-primary w-full text-base">
+          Login <ArrowRight className="h-4 w-4" />
+        </button>
+      </form>
+      {showChangePasswordModal && <ChangePasswordModal onClose={() => setShowChangePasswordModal(false)} />}
+    </>
   );
 }
 
 function RegisterForm({ show, setShow }: { show: boolean; setShow: (v: boolean) => void }) {
-  const { registerUser } = useApp();
+  const { registerUser, toast } = useApp();
   return (
     <form
       className="mt-7 space-y-4"
@@ -202,7 +207,15 @@ function RegisterForm({ show, setShow }: { show: boolean; setShow: (v: boolean) 
         const name = data.get('name') as string || 'User';
         const email = data.get('email') as string || '';
         const phone = data.get('phone') as string || '';
-        registerUser({ name, email, phone, avatarColor: 'from-volt-400 to-spark-500' });
+        const password = data.get('password') as string || '';
+        const confirmPassword = data.get('confirmPassword') as string || '';
+        
+        if (password !== confirmPassword) {
+          toast('Error', 'Passwords do not match.', 'error');
+          return;
+        }
+
+        registerUser({ name, email, phone, avatarColor: 'from-volt-400 to-spark-500', password });
       }}
     >
       <div>
@@ -276,6 +289,162 @@ function GoogleIcon() {
       <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z" />
       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.3 9.14 5.38 12 5.38z" />
     </svg>
+  );
+}
+
+function ChangePasswordModal({ onClose }: { onClose: () => void }) {
+  const [step, setStep] = useState<'options' | 'old_password' | 'request_otp' | 'reset_otp'>('options');
+  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const { toast } = useApp();
+
+  const handleOldPasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const email = data.get('email') as string;
+    const oldPassword = data.get('oldPassword') as string;
+    const newPassword = data.get('newPassword') as string;
+    
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, oldPassword, newPassword })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to change password');
+      }
+      toast('Success', 'Password has been changed successfully.', 'success');
+      onClose();
+    } catch (err: any) {
+      toast('Error', err.message, 'error');
+    }
+  };
+
+  const handleRequestOtpSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const identifier = data.get('emailOrPhone') as string;
+    setEmailOrPhone(identifier);
+    
+    try {
+      const res = await fetch('/api/auth/request-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailOrPhone: identifier })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to request OTP');
+      }
+      toast('OTP Sent', 'Check your terminal console for the OTP.', 'success');
+      setStep('reset_otp');
+    } catch (err: any) {
+      toast('Error', err.message, 'error');
+    }
+  };
+
+  const handleResetPasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const otp = data.get('otp') as string;
+    const newPassword = data.get('newPassword') as string;
+    
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailOrPhone, otp, newPassword })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to reset password');
+      }
+      toast('Success', 'Password has been reset successfully.', 'success');
+      onClose();
+    } catch (err: any) {
+      toast('Error', err.message, 'error');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/50 p-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+        {step === 'options' && (
+          <>
+            <h3 className="text-xl font-bold text-ink-900">Change Password</h3>
+            <p className="mt-2 text-sm text-ink-500">How would you like to change your password?</p>
+            <div className="mt-6 flex flex-col gap-3">
+              <button onClick={() => setStep('old_password')} className="btn-primary w-full">
+                Using old password
+              </button>
+              <button onClick={() => setStep('request_otp')} className="btn-ghost w-full">
+                Reset via OTP (Email/Phone)
+              </button>
+              <button onClick={onClose} className="btn-ghost mt-2 w-full text-ink-500">
+                Cancel
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 'old_password' && (
+          <form onSubmit={handleOldPasswordSubmit} className="space-y-4">
+            <h3 className="text-xl font-bold text-ink-900">Change Password</h3>
+            <div>
+              <label className="label">Email</label>
+              <input name="email" type="email" className="input" required />
+            </div>
+            <div>
+              <label className="label">Old Password</label>
+              <input name="oldPassword" type="password" className="input" required />
+            </div>
+            <div>
+              <label className="label">New Password</label>
+              <input name="newPassword" type="password" className="input" required minLength={6} />
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button type="button" onClick={() => setStep('options')} className="btn-ghost flex-1">Back</button>
+              <button type="submit" className="btn-primary flex-1">Change</button>
+            </div>
+          </form>
+        )}
+
+        {step === 'request_otp' && (
+          <form onSubmit={handleRequestOtpSubmit} className="space-y-4">
+            <h3 className="text-xl font-bold text-ink-900">Request OTP</h3>
+            <p className="text-sm text-ink-500">Enter your registered email or phone number to receive a 6-digit OTP.</p>
+            <div>
+              <label className="label">Email or Phone Number</label>
+              <input name="emailOrPhone" type="text" className="input" required />
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button type="button" onClick={() => setStep('options')} className="btn-ghost flex-1">Back</button>
+              <button type="submit" className="btn-primary flex-1">Send OTP</button>
+            </div>
+          </form>
+        )}
+
+        {step === 'reset_otp' && (
+          <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+            <h3 className="text-xl font-bold text-ink-900">Reset Password</h3>
+            <p className="text-sm text-ink-500">Enter the OTP sent to <b>{emailOrPhone}</b> and your new password.</p>
+            <div>
+              <label className="label">6-Digit OTP</label>
+              <input name="otp" type="text" className="input" required maxLength={6} minLength={6} placeholder="123456" />
+            </div>
+            <div>
+              <label className="label">New Password</label>
+              <input name="newPassword" type="password" className="input" required minLength={6} />
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button type="button" onClick={() => setStep('request_otp')} className="btn-ghost flex-1">Back</button>
+              <button type="submit" className="btn-primary flex-1">Reset</button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
   );
 }
 
