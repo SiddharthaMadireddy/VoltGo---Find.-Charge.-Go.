@@ -19,7 +19,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="min-h-screen bg-transparent">
       <header className="sticky top-0 z-50 border-b border-ink-200/70 bg-white/85 backdrop-blur-xl">
         <div className="container-x flex h-16 items-center justify-between gap-4">
           <button onClick={() => navigate('home')} className="flex items-center">

@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { useApp, AppRoute } from '@/store/app';
 import { Logo } from '@/components/Logo';
+import { WelcomeOverlay } from '@/components/WelcomeOverlay';
 import {
   LayoutDashboard, MapPin, CalendarClock, History, Wallet, Car,
   Bell, User, Menu, X, LogOut, Search, Zap,
@@ -18,7 +19,7 @@ const NAV: { label: string; route: AppRoute; icon: typeof LayoutDashboard }[] = 
 ];
 
 export function DashboardShell({ children, title }: { children: ReactNode; title?: string }) {
-  const { route, navigate, user, logout, notifications } = useApp();
+  const { route, navigate, user, logout, notifications, justLoggedIn } = useApp();
   const [open, setOpen] = useState(false);
   const unread = notifications.filter((n) => !n.read).length;
   const greeting = getGreeting();
@@ -66,9 +67,10 @@ export function DashboardShell({ children, title }: { children: ReactNode; title
   );
 
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="min-h-screen bg-transparent">
+      {justLoggedIn && <WelcomeOverlay />}
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-ink-200 bg-white lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-56 border-r border-ink-200 bg-white lg:block">
         {Sidebar}
       </aside>
 
@@ -83,7 +85,7 @@ export function DashboardShell({ children, title }: { children: ReactNode; title
       )}
 
       {/* Main */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-56">
         <header className="sticky top-0 z-30 border-b border-ink-200/70 bg-white/85 backdrop-blur-xl">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
             <button onClick={() => setOpen(true)} className="rounded-lg p-2 text-ink-700 lg:hidden">

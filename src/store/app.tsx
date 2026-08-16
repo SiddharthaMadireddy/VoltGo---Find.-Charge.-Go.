@@ -28,6 +28,8 @@ interface Toast { id: number; title: string; body?: string; tone: 'success' | 'i
 
 interface AppState {
   user: User | null;
+  justLoggedIn: boolean;
+  clearJustLoggedIn: () => void;
   loginUser: (email: string, password?: string) => Promise<void>;
   loginWithGoogleToken: (token: string) => Promise<void>;
   registerUser: (u: User) => Promise<void>;
@@ -61,6 +63,7 @@ const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
   const [route, setRoute] = useState<Route>('home');
   const [favorites, setFavorites] = useState<string[]>(['st-gachibowli', 'st-cyberhub']);
   const [walletBalance, setWalletBalance] = useState(0);
@@ -109,6 +112,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       const data = await res.json();
       loadUserData(data);
+      setJustLoggedIn(true);
       setRoute('dashboard');
       setTimeout(() => toastMessage(`Welcome back, ${data.user.name.split(' ')[0]}!`, 'You are now signed in.'), 100);
     } catch (e: any) {
@@ -126,6 +130,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!res.ok) throw new Error('Google Login failed.');
       const data = await res.json();
       loadUserData(data);
+      setJustLoggedIn(true);
       setRoute('dashboard');
       setTimeout(() => toastMessage(`Welcome, ${data.user.name.split(' ')[0]}!`, 'You are signed in via Google.'), 100);
     } catch (e: any) {
@@ -146,6 +151,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       const data = await res.json();
       loadUserData(data);
+      setJustLoggedIn(true);
       setRoute('dashboard');
       setTimeout(() => toastMessage(`Welcome, ${data.user.name.split(' ')[0]}!`, 'Account created.'), 100);
     } catch (e: any) {
@@ -267,13 +273,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppState>(() => ({
     user, loginUser, loginWithGoogleToken, registerUser, login, logout, route, navigate,
+    justLoggedIn, clearJustLoggedIn: () => setJustLoggedIn(false),
     favorites, toggleFavorite,
     walletBalance, walletTxns, addMoney,
     sessions, vehicles, addVehicle, updateVehicle, removeVehicle,
     bookings, addBooking, cancelBooking, notifications, markAllNotificationsRead,
     toasts, toast: toastMessage, dismissToast,
   }), [
-    user, loginUser, loginWithGoogleToken, registerUser, login, logout, route, navigate, favorites, toggleFavorite,
+    user, loginUser, loginWithGoogleToken, registerUser, login, logout, route, navigate, justLoggedIn, favorites, toggleFavorite,
     walletBalance, walletTxns, addMoney, sessions, vehicles, addVehicle, updateVehicle, removeVehicle,
     bookings, addBooking, cancelBooking, notifications, markAllNotificationsRead, toasts, toastMessage, dismissToast
   ]);

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useApp } from '@/store/app';
 import { DashboardShell } from '@/components/DashboardShell';
 import { StatCard, StationCard, SectionHeading } from '@/components/ui';
@@ -10,8 +11,39 @@ import { STATIONS, stationAvailableCount } from '@/data/stations';
 export function DashboardPage() {
   const { user, walletBalance, bookings, sessions, navigate, favorites } = useApp();
   const lastSession = sessions[0];
-  const nearby = [...STATIONS].sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 4);
+  const nearby = [...STATIONS].sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 3);
   const upcoming = bookings.find((b) => b.status === 'upcoming');
+
+  const connectorUsage = useMemo(() => {
+    if (!sessions || sessions.length === 0) {
+      return [
+        { label: 'CCS2', pct: 0, color: 'bg-volt-500' },
+        { label: 'Type 2', pct: 0, color: 'bg-spark-500' },
+        { label: 'CHAdeMO', pct: 0, color: 'bg-amberx-500' },
+      ];
+    }
+    
+    const counts = sessions.reduce((acc, s) => {
+      acc[s.connector] = (acc[s.connector] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const total = sessions.length;
+    
+    const types = [
+      { label: 'CCS2', color: 'bg-volt-500' },
+      { label: 'Type 2', color: 'bg-spark-500' },
+      { label: 'CHAdeMO', color: 'bg-amberx-500' },
+      { label: 'GB/T', color: 'bg-rosex-500' }
+    ];
+
+    const result = types.map(t => ({
+      ...t,
+      pct: counts[t.label] ? Math.round((counts[t.label] / total) * 100) : 0
+    })).filter(t => t.pct > 0);
+
+    return result.sort((a, b) => b.pct - a.pct);
+  }, [sessions]);
 
   return (
     <DashboardShell>
@@ -87,7 +119,7 @@ export function DashboardPage() {
             View map <ArrowRight className="h-4 w-4" />
           </button>
         </div>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {nearby.map((s) => (
             <StationCard key={s.id} station={s} onClick={() => navigate('find')} />
           ))}
@@ -142,11 +174,7 @@ export function DashboardPage() {
             </div>
           </div>
           <div className="mt-3 space-y-2">
-            {[
-              { label: 'CCS2', pct: 62, color: 'bg-volt-500' },
-              { label: 'Type 2', pct: 28, color: 'bg-spark-500' },
-              { label: 'CHAdeMO', pct: 10, color: 'bg-amberx-500' },
-            ].map((r) => (
+            {connectorUsage.map((r) => (
               <div key={r.label}>
                 <div className="flex justify-between text-xs">
                   <span className="font-semibold text-ink-600">{r.label}</span>

@@ -8,7 +8,7 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-ink-50 text-ink-900 font-sans antialiased;
+    @apply bg-volt-50/50 text-ink-900 font-sans antialiased;
     text-rendering: optimizeLegibility;
   }
   ::selection {
@@ -28,7 +28,7 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-110 hover:shadow-xl active:scale-90 disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-primary {
     @apply btn bg-volt-500 text-white shadow-glow hover:bg-volt-600;
@@ -47,7 +47,7 @@
   }
 
   .card {
-    @apply rounded-2xl bg-white ring-1 ring-ink-200/70 shadow-card;
+    @apply rounded-2xl bg-white ring-1 ring-ink-200/70 shadow-card transition-all duration-300 ease-out;
   }
   .card-pad {
     @apply card p-5;
