@@ -27,6 +27,7 @@ export function ReservationModal({
   const [time, setTime] = useState(TIME_SLOTS[3]);
   const [duration, setDuration] = useState(45);
   const [confirmed, setConfirmed] = useState<null | { id: string; date: string }>(null);
+  const [isBooking, setIsBooking] = useState(false);
 
   const days = useMemo(() => nextDays(7), []);
   const selectedCharger = station.chargers.find((c) => c.label === charger);
@@ -42,11 +43,15 @@ export function ReservationModal({
     return () => { window.removeEventListener('keydown', onKey); };
   }, [onClose]);
 
-  function confirm() {
+  async function confirm() {
     if (total > walletBalance) {
       toast('Insufficient wallet balance', `You need ₹${total} but have ₹${walletBalance}. Add money to your wallet.`, 'error');
       return;
     }
+    
+    setIsBooking(true);
+    await new Promise((r) => setTimeout(r, 1500));
+    
     const id = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
     const dateStr = `${day === 1 ? 'Tomorrow ·' : ''} ${days[day]}, 2026`;
     addBooking({
@@ -54,6 +59,8 @@ export function ReservationModal({
       chargerLabel: charger, date: dateStr, time, durationMin: duration,
       reservationFee, estimatedCost: estCost, total, status: 'upcoming',
     });
+    
+    setIsBooking(false);
     setConfirmed({ id, date: dateStr });
   }
 
@@ -164,8 +171,12 @@ export function ReservationModal({
             </div>
 
             <div className="border-t border-ink-200 p-5">
-              <button onClick={confirm} className="btn-primary w-full text-base">
-                <Calendar className="h-4 w-4" /> Confirm Reservation
+              <button onClick={confirm} disabled={isBooking} className="btn-primary w-full text-base">
+                {isBooking ? (
+                  <span className="flex items-center gap-2"><div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Processing...</span>
+                ) : (
+                  <><Calendar className="h-4 w-4" /> Confirm Reservation</>
+                )}
               </button>
             </div>
           </>

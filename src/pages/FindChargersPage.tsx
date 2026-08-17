@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useApp } from '@/store/app';
 import { DashboardShell } from '@/components/DashboardShell';
 import { PublicShell } from '@/components/PublicShell';

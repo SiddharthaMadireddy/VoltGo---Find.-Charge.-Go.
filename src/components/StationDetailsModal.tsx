@@ -17,6 +17,7 @@ import { ReservationModal } from '@/components/ReservationModal';
 export function StationDetailsModal({ station, onClose }: { station: ChargingStation; onClose: () => void }) {
   const { favorites, toggleFavorite, navigate, toast } = useApp();
   const [reservationCharger, setReservationCharger] = useState<string | null>(null);
+  const [startingId, setStartingId] = useState<string | null>(null);
   const fav = favorites.includes(station.id);
   const avail = stationAvailableCount(station);
   const occ = stationOccupiedCount(station);
@@ -32,6 +33,14 @@ export function StationDetailsModal({ station, onClose }: { station: ChargingSta
       document.body.style.overflow = '';
     };
   }, [onClose]);
+
+  const handleStart = async (cLabel: string, cId: string) => {
+    setStartingId(cId);
+    await new Promise((r) => setTimeout(r, 1500));
+    setStartingId(null);
+    toast('Charging started', `${cLabel} · ${station.name}`, 'success');
+    onClose();
+  };
 
   return (
     <>
@@ -138,10 +147,15 @@ export function StationDetailsModal({ station, onClose }: { station: ChargingSta
                           <Calendar className="h-3.5 w-3.5" /> Reserve
                         </button>
                         <button
-                          onClick={() => { toast('Charging started', `${c.label} · ${station.name}`, 'success'); onClose(); }}
+                          onClick={() => handleStart(c.label, c.id)}
+                          disabled={startingId === c.id}
                           className="btn-primary btn-sm flex-1"
                         >
-                          <BatteryCharging className="h-3.5 w-3.5" /> Start
+                          {startingId === c.id ? (
+                            <span className="flex items-center gap-1.5"><div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" /> Starting...</span>
+                          ) : (
+                            <><BatteryCharging className="h-3.5 w-3.5" /> Start</>
+                          )}
                         </button>
                       </div>
                     )}

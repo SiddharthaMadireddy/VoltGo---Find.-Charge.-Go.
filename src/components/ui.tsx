@@ -191,6 +191,40 @@ export function StationCard({ station, onClick }: { station: ChargingStation; on
   );
 }
 
+export function StationSkeletonCard() {
+  return (
+    <div className="card-pad flex flex-col justify-between text-left ring-1 ring-ink-200 bg-white animate-pulse h-full">
+      <div>
+        <div className="flex items-start justify-between">
+          <div className="h-5 w-1/2 rounded bg-ink-200"></div>
+          <div className="h-6 w-6 rounded bg-ink-200"></div>
+        </div>
+        <div className="mt-2 h-3 w-3/4 rounded bg-ink-200"></div>
+      </div>
+      
+      <div className="mt-4 flex gap-2">
+        <div className="h-5 w-16 rounded-full bg-ink-200"></div>
+        <div className="h-5 w-16 rounded-full bg-ink-200"></div>
+      </div>
+      
+      <div className="mt-4 flex items-end justify-between">
+        <div>
+          <div className="h-3 w-20 rounded bg-ink-200"></div>
+          <div className="mt-2 flex gap-1">
+            <div className="h-1.5 w-5 rounded-full bg-ink-200"></div>
+            <div className="h-1.5 w-5 rounded-full bg-ink-200"></div>
+            <div className="h-1.5 w-5 rounded-full bg-ink-200"></div>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="h-3 w-8 ml-auto rounded bg-ink-200"></div>
+          <div className="mt-1 h-5 w-16 rounded bg-ink-200"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function StatCard({
   label, value, icon, accent = 'volt', sub,
 }: { label: string; value: ReactNode; icon: ReactNode; accent?: 'volt' | 'spark' | 'amber' | 'rose'; sub?: string }) {
