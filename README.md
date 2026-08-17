@@ -4,7 +4,9 @@ VoltGo is a smart EV charging network web application that allows users to find 
 
 ## 🚀 Features
 
-- **EV Station Locator**: Find and explore over 2,500+ charging stations across 50+ cities.
+- **EV Station Locator**: Find and explore over 2,500+ charging stations, including 70+ dynamically generated city stations and 39+ ultra-fast premium highway hubs across major routes in India.
+- **Premium UX & Animations**: Experience a highly polished, interactive UI with ultra-premium CSS animations, including a cinematic full-screen login transition and dynamic levitating components.
+- **Dynamic Usage Dashboard**: Track your charging stats with real-time, dynamically calculated spending and connector usage metrics based on your actual session history.
 - **Authentication**: Secure Google OAuth integration for quick sign-up and login.
 - **Wallet & Payments**: Add money to your VoltGo wallet and pay for your charging sessions and reservations seamlessly.
 - **Vehicle Management**: Add and manage your electric vehicles (battery capacity, connector types, etc.) in your virtual garage.
